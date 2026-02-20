@@ -70,14 +70,21 @@ public class ECommerceFlowTest extends BaseTest {
         // Step 4: Verify cart (Consistency check)
         // Note: DummyJSON simulates POST requests. The newly added cart with
         // cartData.getId() might not be fetchable!
-        Response getCartRes = cartService.getCartById(cartData.getId());
-        if (getCartRes.getStatusCode() == 200) {
-            CartResponse fetchedCart = getCartRes.as(CartResponse.class);
-            assertEquals(cartData.getId(), fetchedCart.getId(), "Fetched cart ID should match the added cart ID");
-        } else {
-            // Documenting known dummy API limitation
-            System.out.println("Dummy API does not persist new objects. GET returned: " + getCartRes.getStatusCode());
-            assertTrue(getCartRes.getStatusCode() == 404, "Since object isn't saved, expect 404");
+        try {
+            Response getCartRes = cartService.getCartById(cartData.getId());
+            if (getCartRes.getStatusCode() == 200) {
+                CartResponse fetchedCart = getCartRes.as(CartResponse.class);
+                assertEquals(cartData.getId(), fetchedCart.getId(), "Fetched cart ID should match the added cart ID");
+            } else {
+                // Documenting known dummy API limitation
+                System.out.println("Dummy API does not persist new objects. GET returned: " + getCartRes.getStatusCode());
+                assertTrue(getCartRes.getStatusCode() == 404, "Since object isn't saved, expect 404");
+            }
+        } catch (Exception e) {
+            // RestAssured throws AssertionError on non-2xx responses
+            String errorMsg = e.getMessage() != null ? e.getMessage() : e.toString();
+            System.out.println("Dummy API does not persist new objects. Caught exception: " + e.getClass().getName() + ", message: " + errorMsg);
+            assertTrue(errorMsg.contains("404"), "Expected 404 in error message. Got: " + errorMsg);
         }
     }
 }
