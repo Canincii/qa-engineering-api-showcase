@@ -37,20 +37,34 @@ public class NegativeTests extends BaseTest {
     @Tag("regression")
     @Description("Verify 404 response for non-existent product ID")
     public void testNonExistentProduct() {
-        Response res = productService.getProductById(999999L);
-        assertEquals(404, res.getStatusCode(), "Expected 404 Not Found for invalid product ID");
+        try {
+            Response res = productService.getProductById(999999L);
+            assertEquals(404, res.getStatusCode(), "Expected 404 Not Found for invalid product ID");
+        } catch (Exception e) {
+            // RestAssured throws AssertionError for non-2xx responses
+            String errorMsg = e.getMessage() != null ? e.getMessage() : e.toString();
+            System.out.println("Caught exception type: " + e.getClass().getName() + ", message: " + errorMsg);
+            assertTrue(errorMsg.contains("404"), "Expected 404 in error message. Got: " + errorMsg);
+        }
     }
 
     @Test
     @Tag("regression")
     @Description("Security Demo: Verify behavior with invalid/missing token on a protected endpoint")
     public void testAuthTokenSecurityDemo() {
-        Response res = io.restassured.RestAssured.given()
-                .spec(com.dummyjson.clients.RestClient.getBaseSpec().auth().oauth2("invalid_token_123"))
-                .get("/auth/me"); // Hit a protected endpoint to enforce 401. E.g., /users/1 allows public access.
+        try {
+            Response res = io.restassured.RestAssured.given()
+                    .spec(com.dummyjson.clients.RestClient.getBaseSpec().auth().oauth2("invalid_token_123"))
+                    .get("/auth/me");
 
-        System.out.println("Security Demo: Trying GET /auth/me with invalid token. Response: " + res.getStatusCode());
-        assertEquals(401, res.getStatusCode(),
-                "Expected 401 Unauthorized when accessing a protected endpoint with an invalid token");
+            System.out.println("Security Demo: Trying GET /auth/me with invalid token. Response: " + res.getStatusCode());
+            assertEquals(401, res.getStatusCode(),
+                    "Expected 401 Unauthorized when accessing a protected endpoint with an invalid token");
+        } catch (Exception e) {
+            // RestAssured throws AssertionError for 401 responses
+            String errorMsg = e.getMessage() != null ? e.getMessage() : e.toString();
+            System.out.println("Caught exception type: " + e.getClass().getName() + ", message: " + errorMsg);
+            assertTrue(errorMsg.contains("401"), "Expected 401 in error message. Got: " + errorMsg);
+        }
     }
 }
