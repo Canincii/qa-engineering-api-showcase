@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "id": { "type": "number" },
+    "products": { "type": "array" },
+    "total": { "type": "number" },
+    "discountedTotal": { "type": "number" },
+    "userId": { "type": "number" },
+    "totalProducts": { "type": "number" },
+    "totalQuantity": { "type": "number" }
+  },
+  "required": ["id", "products", "userId"]
+}
